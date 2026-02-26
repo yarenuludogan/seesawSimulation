@@ -2,7 +2,7 @@ export function getRandomWeight() {
   return Math.floor(Math.random() * 10) + 1;
 }
 
-
+// colors looked ugly, will be changed later
 const WEIGHT_COLORS = {
   1: "#ffd1dc",   
   2: "#ffdfba",   
