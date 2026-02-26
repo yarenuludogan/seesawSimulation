@@ -1,4 +1,4 @@
-import { plank, plankRotation, leftWeightEl, rightWeightEl, nextWeightEl, tiltWeightEl } from "./dom.js";
+import { plank, plankWrapper, plankRotation, leftWeightEl, rightWeightEl, nextWeightEl, tiltWeightEl } from "./dom.js";
 import { computeWeights, computeTorques, computeAngle } from "./physics.js";
 import { getRandomWeight, getSizeForWeight } from "./utils.js";
 import { dropObject, FALL_DURATION_MS } from "./drop.js";
@@ -10,6 +10,23 @@ const PIVOT = 200;
 let objects = [];
 let nextWeight = getRandomWeight();
 
+function getSide(x) {
+  return x < PIVOT ? "left" : "right";
+}
+
+function addHistoryEntry(weight, x) {
+  const side = getSide(x);
+  const li = document.createElement("li");
+  li.textContent = `${weight} kg object dropped on the ${side} side`;
+  historyListEl.insertBefore(li, historyListEl.firstChild);
+}
+
+function renderHistory() {
+  historyListEl.innerHTML = "";
+  objects.forEach(obj => {
+    addHistoryEntry(obj.weight, obj.x);
+  });
+}
 
 
 function saveState() {
