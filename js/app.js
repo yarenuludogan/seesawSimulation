@@ -5,10 +5,14 @@ import { dropObject, FALL_DURATION_MS } from "./drop.js";
 
 const dropArea = document.querySelector(".drop-area");
 const historyListEl = document.getElementById("historyList");
+const pauseButton = document.getElementById("pauseButton");
+const restartButton = document.getElementById("restartButton");
 const PIVOT = 200;
 
 let objects = [];
 let nextWeight = getRandomWeight();
+let isPaused = false;
+let currentAngle = 0;
 
 function getSide(x) {
   return x < PIVOT ? "left" : "right";
@@ -46,9 +50,13 @@ function updatePhysics() {
   rightWeightEl.textContent = rightWeight;
 
   const angle = computeAngle(leftTorque, rightTorque);
+  currentAngle = angle;
 
   tiltWeightEl.textContent = angle.toFixed(2);
-  plankRotation.style.transform = `rotate(${angle}deg)`;
+
+  if (!isPaused) {
+    plankRotation.style.transform = `rotate(${angle}deg)`;
+  }
 }
 
 
@@ -96,6 +104,40 @@ dropArea.addEventListener("click", (event) => {
     updatePhysics();
     saveState();
   }, FALL_DURATION_MS + 50);
+});
+
+function clearObjects() {
+  document.querySelectorAll(".object").forEach(el => el.remove());
+}
+
+pauseButton.addEventListener("click", () => {
+  if (!isPaused) {
+    isPaused = true;
+    pauseButton.textContent = "Start";
+    plankRotation.style.transform = "rotate(0deg)";
+  } else {
+    isPaused = false;
+    pauseButton.textContent = "Pause";
+    plankRotation.style.transform = `rotate(${currentAngle}deg)`;
+  }
+});
+
+restartButton.addEventListener("click", () => {
+  objects = [];
+  nextWeight = getRandomWeight();
+  nextWeightEl.textContent = nextWeight;
+
+  historyListEl.innerHTML = "";
+  clearObjects();
+  localStorage.removeItem("seesawState");
+
+  isPaused = false;
+  currentAngle = 0;
+  pauseButton.textContent = "Pause";
+  plankRotation.style.transform = "rotate(0deg)";
+  leftWeightEl.textContent = 0;
+  rightWeightEl.textContent = 0;
+  tiltWeightEl.textContent = "0.00";
 });
 
 loadState();

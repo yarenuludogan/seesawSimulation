@@ -18,10 +18,36 @@ body {
   align-items: center;
   gap: 100px;
 }
+.controllers {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  gap: 12px;
+}
+
+.controllers button {
+  border: 0;
+  border-radius: 10px;
+  padding: 10px 14px;
+  background: #ffffff;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.controllers button:hover {
+  transform: translateY(-1px);
+}
+
+.controllers button:active {
+  transform: translateY(0px);
+}
 .background-container .seesaw-container {
   display: flex;
   justify-content: center;
-  margin-top: 50px;
+  margin-top: 170px;
+  position: relative;
+  z-index: 1;
 }
 
 
@@ -46,6 +72,7 @@ body {
   width: 400px;
   height: 200px; 
   top: -200px;
+  z-index: 0;
 
 }
 
