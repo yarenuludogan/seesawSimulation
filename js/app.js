@@ -1,12 +1,19 @@
-import { plankRotation, leftWeightEl, rightWeightEl, nextWeightEl, tiltWeightEl } from "./dom.js";
+import {
+  plankRotation,
+  leftWeightEl,
+  rightWeightEl,
+  nextWeightEl,
+  tiltWeightEl,
+  dropArea,
+  historyListEl,
+  pauseButton,
+  restartButton,
+} from "./dom.js";
 import { computeWeights, computeTorques, computeAngle } from "./physics.js";
 import { getRandomWeight, getSizeForWeight } from "./utils.js";
-import { dropObject, FALL_DURATION_MS } from "./drop.js";
+import { dropObject, FALL_DURATION, SETTLE_DELAY } from "./drop.js";
 
-const dropArea = document.querySelector(".drop-area");
-const historyListEl = document.getElementById("historyList");
-const pauseButton = document.getElementById("pauseButton");
-const restartButton = document.getElementById("restartButton");
+const STORAGE_KEY = "seesawState";
 const PIVOT = 200;
 
 let objects = [];
@@ -38,7 +45,7 @@ function saveState() {
     objects,
     nextWeight
   };
-  localStorage.setItem("seesawState", JSON.stringify(state));
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
 }
 
 
@@ -61,7 +68,7 @@ function updatePhysics() {
 
 
 function loadState() {
-  const saved = localStorage.getItem("seesawState");
+  const saved = localStorage.getItem(STORAGE_KEY);
 
   if (!saved) {
     nextWeightEl.textContent = nextWeight;
@@ -103,7 +110,7 @@ dropArea.addEventListener("click", (event) => {
     addHistoryEntry(weight, x);
     updatePhysics();
     saveState();
-  }, FALL_DURATION_MS + 50);
+  }, FALL_DURATION + SETTLE_DELAY);
 });
 
 function clearObjects() {
@@ -129,7 +136,7 @@ restartButton.addEventListener("click", () => {
 
   historyListEl.innerHTML = "";
   clearObjects();
-  localStorage.removeItem("seesawState");
+  localStorage.removeItem(STORAGE_KEY);
 
   isPaused = false;
   currentAngle = 0;

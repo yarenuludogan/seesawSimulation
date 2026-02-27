@@ -1,7 +1,8 @@
 import { plank, plankWrapper } from "./dom.js";
 import { createFallingCircle, getSizeForWeight } from "./utils.js";
 
-export const FALL_DURATION_MS = 500;
+export const FALL_DURATION= 500;
+export const SETTLE_DELAY = 50;
 
 export function dropObject(x, weight, { animate = true, startTop = -150 } = {}) {
   const circle = createFallingCircle(x, weight);
@@ -23,7 +24,7 @@ export function dropObject(x, weight, { animate = true, startTop = -150 } = {}) 
 
   circle.style.left = `${startLeft}px`;
   circle.style.top = `${clampedStartTop}px`;
-  circle.style.transition = `transform ${FALL_DURATION_MS}ms ease-in`;
+  circle.style.transition = `transform ${FALL_DURATION}ms ease-in`;
   circle.style.transform = "translateY(0px)";
 
   requestAnimationFrame(() => {
@@ -36,7 +37,7 @@ export function dropObject(x, weight, { animate = true, startTop = -150 } = {}) 
     circle.style.left = `${x - size / 2}px`;
     circle.style.transition = "";
     circle.style.transform = "";
-  }, FALL_DURATION_MS + 50);
+  }, FALL_DURATION + SETTLE_DELAY);
 
   return circle;
 }
