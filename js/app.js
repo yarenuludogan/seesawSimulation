@@ -1,4 +1,4 @@
-import { plank, plankWrapper, plankRotation, leftWeightEl, rightWeightEl, nextWeightEl, tiltWeightEl } from "./dom.js";
+import { plankRotation, leftWeightEl, rightWeightEl, nextWeightEl, tiltWeightEl } from "./dom.js";
 import { computeWeights, computeTorques, computeAngle } from "./physics.js";
 import { getRandomWeight, getSizeForWeight } from "./utils.js";
 import { dropObject, FALL_DURATION_MS } from "./drop.js";
@@ -78,13 +78,15 @@ function loadState() {
 }
 
 dropArea.addEventListener("click", (event) => {
-  const rect = plank.getBoundingClientRect();
+  const areaRect = dropArea.getBoundingClientRect();
 
-
-  const x = event.clientX - rect.left;
+  const x = event.clientX - areaRect.left;
   const weight = nextWeight;
-  const circle = dropObject(x, weight);
-  const finalY = -getSizeForWeight(weight);
+  const size = getSizeForWeight(weight);
+  const dropAreaHeight = event.clientY - areaRect.top; 
+  const startTop = -dropArea.offsetHeight + dropAreaHeight - size;
+  dropObject(x, weight, { startTop });
+  const finalY = -size;
   nextWeight = getRandomWeight();
   nextWeightEl.textContent = nextWeight;
 
