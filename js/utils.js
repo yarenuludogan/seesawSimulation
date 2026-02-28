@@ -25,6 +25,5 @@ export function createFallingCircle(x, weight) {
   circle.style.left = `${x - size / 2}px`;
   circle.style.top = "-150px";
   circle.textContent = `${weight} kg`;
-
   return circle;
 }

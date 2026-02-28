@@ -1,17 +1,7 @@
-import {
-  plankRotation,
-  leftWeightEl,
-  rightWeightEl,
-  nextWeightEl,
-  tiltWeightEl,
-  dropArea,
-  historyListEl,
-  pauseButton,
-  restartButton,
-} from "./dom.js";
+import { plankRotation, leftWeightEl, rightWeightEl, nextWeightEl,tiltWeightEl,dropArea, historyListEl, pauseButton, restartButton} from "./dom.js";
 import { computeWeights, computeTorques, computeAngle } from "./physics.js";
 import { getRandomWeight, getSizeForWeight } from "./utils.js";
-import { dropObject, FALL_DURATION, SETTLE_DELAY } from "./drop.js";
+import { dropObject, dropObjectFromArea, FALL_DURATION, SETTLE_DELAY } from "./drop.js";
 
 const STORAGE_KEY = "seesawState";
 const PIVOT = 200;
@@ -92,20 +82,99 @@ function loadState() {
   updatePhysics();
 }
 
-dropArea.addEventListener("click", (event) => {
-  const areaRect = dropArea.getBoundingClientRect();
+let previewCircle = null;
 
-  const x = event.clientX - areaRect.left;
+dropArea.addEventListener("mousemove", (event) => {
+  const areaBox = dropArea.getBoundingClientRect();
+  const x = event.clientX - areaBox.left;
+  const clickY = event.clientY - areaBox.top;
   const weight = nextWeight;
   const size = getSizeForWeight(weight);
-  const dropAreaHeight = event.clientY - areaRect.top; 
-  const startTop = -dropArea.offsetHeight + dropAreaHeight - size;
-  dropObject(x, weight, { startTop });
-  const finalY = -size;
+
+  if (previewCircle) {
+    previewCircle.remove();
+  }
+
+  const oldLine = dropArea.querySelector(".preview-line");
+  if (oldLine) oldLine.remove();
+  const oldText = dropArea.querySelector(".distance-text");
+  if (oldText) oldText.remove();
+
+
+  previewCircle = document.createElement("div");
+  previewCircle.className = "object";
+  previewCircle.style.position = "absolute";
+  previewCircle.style.width = `${size}px`;
+  previewCircle.style.height = `${size}px`;
+  previewCircle.style.borderRadius = "50%";
+  previewCircle.style.left = `${x - size / 2}px`;
+  previewCircle.style.top = `${clickY}px`;
+  previewCircle.style.opacity = "0.5";
+  previewCircle.style.pointerEvents = "none";
+  previewCircle.textContent = `${weight} kg`;
+  previewCircle.style.display = "flex";
+  previewCircle.style.alignItems = "center";
+  previewCircle.style.justifyContent = "center";
+  previewCircle.style.fontSize = "10px";
+
+  dropArea.appendChild(previewCircle);
+
+  const plankCenter = PIVOT;
+  const distanceToCenter = Math.abs(x - plankCenter);
+
+  const line = document.createElement("div");
+  line.className = "preview-line";
+  line.style.position = "absolute";
+  line.style.height = "2px";
+  line.style.background = "#999";
+  line.style.top = `${clickY + size / 2}px`;
+  line.style.left = `${Math.min(x, plankCenter)}px`;
+  line.style.width = `${distanceToCenter}px`;
+  line.style.pointerEvents = "none";
+  dropArea.appendChild(line);
+
+
+  const distanceEl = document.createElement("div");
+  distanceEl.className = "distance-text";
+  distanceEl.style.position = "absolute";
+  distanceEl.style.left = `${(x + plankCenter) / 2}px`;
+  distanceEl.style.top = `${clickY + size / 2 - 20}px`;
+  distanceEl.style.fontSize = "12px";
+  distanceEl.style.fontWeight = "bold";
+  distanceEl.style.color = "#666";
+  distanceEl.style.transform = "translateX(-50%)";
+  distanceEl.style.pointerEvents = "none";
+  distanceEl.style.whiteSpace = "nowrap";
+  distanceEl.textContent = `${distanceToCenter.toFixed(0)}px`;
+  dropArea.appendChild(distanceEl);
+
+  console.log(`Distance to plank center: ${distanceToCenter.toFixed(2)}px`);
+});
+
+dropArea.addEventListener("mouseleave", () => {
+  if (previewCircle) {
+    previewCircle.remove();
+    previewCircle = null;
+  }
+  const oldLine = dropArea.querySelector(".preview-line");
+  if (oldLine) oldLine.remove();
+  const oldText = dropArea.querySelector(".distance-text");
+  if (oldText) oldText.remove();
+});
+
+dropArea.addEventListener("click", (event) => {
+  const areaBox = dropArea.getBoundingClientRect();
+  const x = event.clientX - areaBox.left;
+  const clickY = event.clientY - areaBox.top;
+  const weight = nextWeight;
+
+  dropObjectFromArea(x, weight, clickY, currentAngle, dropArea);
+
   nextWeight = getRandomWeight();
   nextWeightEl.textContent = nextWeight;
 
   setTimeout(() => {
+    const finalY = -getSizeForWeight(weight);
     objects.push({ weight, x, y: finalY });
     addHistoryEntry(weight, x);
     updatePhysics();
@@ -133,11 +202,9 @@ restartButton.addEventListener("click", () => {
   objects = [];
   nextWeight = getRandomWeight();
   nextWeightEl.textContent = nextWeight;
-
   historyListEl.innerHTML = "";
   clearObjects();
   localStorage.removeItem(STORAGE_KEY);
-
   isPaused = false;
   currentAngle = 0;
   pauseButton.textContent = "Pause";
