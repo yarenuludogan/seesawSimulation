@@ -196,6 +196,7 @@ body {
   box-shadow: var(--shadow-sm);
   min-width: 320px;
   max-width: 400px;
+  height: 270px;
 }
 
 .history-title {
