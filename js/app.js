@@ -29,16 +29,6 @@ function renderHistory() {
   });
 }
 
-
-function saveState() {
-  const state = {
-    objects,
-    nextWeight
-  };
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-}
-
-
 function updatePhysics() {
   const { leftWeight, rightWeight } = computeWeights(objects, PIVOT);
   const { leftTorque, rightTorque } = computeTorques(objects, PIVOT);
@@ -56,6 +46,13 @@ function updatePhysics() {
   }
 }
 
+function saveState() {
+  const state = {
+    objects,
+    nextWeight
+  };
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
 
 function loadState() {
   const saved = localStorage.getItem(STORAGE_KEY);
